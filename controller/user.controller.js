@@ -4,8 +4,11 @@ const userModel = require('../model/user.model')
 const transferModel = require('../model/user.transfer')
 const inflowModel = require('../model/inflow')
 const outflowModel = require('../model/outflow')
+const walletModel = require('../model/wallet')
 let userIdentification;
 let signinValidation = '';
+
+//signup post request
 const signupPost = (req, res) => {
     console.log(req.body)
     let form = new userModel(req.body)
@@ -31,12 +34,12 @@ const signupPost = (req, res) => {
 
 
 }
-
+//signin post request
 const signinPost = (req, res) => {
 
     userModel.findOne({ email: req.body.email }, (err, result) => {
         if (err) {
-            console.log('cant find user')
+            console.log(err)
         } else {
             if (result) {
                 if (result.email === req.body.email && result.password === req.body.password) {
@@ -54,6 +57,7 @@ const signinPost = (req, res) => {
 
 }
 
+//dashboard get request
 const dashboardetails = (req, res) => {
     userModel.findOne({ _id: signinValidation }, (err, result) => {
         if (err) {
@@ -64,6 +68,7 @@ const dashboardetails = (req, res) => {
     })
 }
 let user
+//funding of account post request
 const fundAccount = (req, res) => {
 
     userModel.findOne({ _id: signinValidation }, (err, result) => {
@@ -82,6 +87,9 @@ const fundAccount = (req, res) => {
 
     })
 }
+
+
+//Tranfering of money post request
 const transferDebit = (req, res) => {
     console.log(req.body.amounttransferred)
     userModel.findOne({ _id: signinValidation }, (err, result) => {
@@ -97,6 +105,8 @@ const transferDebit = (req, res) => {
         })
     })
 }
+
+//Transaction Details post request
 const fundingaccountHistory = (req, res) => {
     console.log(req.body)
     let form = new transferModel(req.body)
@@ -116,6 +126,44 @@ const inflow = (req, res) => {
     console.log(req.body)
 
 }
+
+//wallet creation post request
+const walletCreation = (req, res) => {
+    console.log(req.body)
+    let form = walletModel(req.body)
+    form.save((err) => {
+        if (err) {
+            res.send({ message: 'unable to save', staus: false })
+        } else {
+            res.send({ message: 'succesful', status: true })
+        }
+    })
+
+}
+//wallet get request
+const wallet = (req, res) => {
+    walletModel.find({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.send(result)
+        }
+    })
+
+}
+const deleteWallet = (req, res) => {
+
+    walletModel.findByIdAndDelete({ _id: req.body['walletid'] }, (err, result) => {
+        if (err) {
+            res.send({ message: 'unable to delete' })
+        } else {
+            if (result) {
+                res.send({ message: 'Deleted Sucessfully' })
+            }
+        }
+    })
+}
+//transaction history get requests
 const transactionHistory = (req, res) => {
     transferModel.find({ transferid: signinValidation }, (err, result) => {
         res.send(result)
@@ -126,4 +174,17 @@ const transactionHistory = (req, res) => {
 
 
 
-module.exports = { signupPost, signinPost, dashboardetails, fundAccount, transferDebit, fundingaccountHistory, transactionHistory, outflow, inflow }
+module.exports = {
+    signupPost,
+    signinPost,
+    dashboardetails,
+    fundAccount,
+    transferDebit,
+    fundingaccountHistory,
+    transactionHistory,
+    outflow,
+    inflow,
+    walletCreation,
+    wallet,
+    deleteWallet
+}
