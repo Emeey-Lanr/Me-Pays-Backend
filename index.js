@@ -15,7 +15,7 @@ app.use('/user', user_route)
 const mongoose = require('mongoose')
 mongoose.connect(URI, (err) => {
     if (err) {
-        console.log('not connected')
+        console.log('not connected', err)
     } else {
         console.log('connected')
     }

@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema({
     accountPin: { type: Number },
     imgUrl: { type: String },
 
+
 })
 
 

@@ -1,10 +1,21 @@
-
 const mongoose = require('mongoose')
 const userModel = require('../model/user.model')
 const transferModel = require('../model/user.transfer')
 const inflowModel = require('../model/inflow')
 const outflowModel = require('../model/outflow')
 const walletModel = require('../model/wallet')
+const nodemailer = require('nodemailer')
+require('dotenv').config()
+const cloudinary = require('cloudinary')
+cloudinary.config({
+    cloud_name: process.env.CLOUDNAME,
+    api_key: process.env.APIKEY,
+    api_secret: process.env.APISECRET,
+});
+
+let registeredUserEmail
+let registeredUserFirstName
+let registeredUserLastName
 let userIdentification;
 let signinValidation = '';
 
@@ -23,8 +34,39 @@ const signupPost = (req, res) => {
                     if (err) {
                         res.send({ message: 'Unsucessful Registartion' })
                     } else {
-                        signinValidation = result.id
                         res.send({ message: 'Registered Succesfully', status: true, userIdentification: result.id })
+                        signinValidation = result.id
+                        registeredUserEmail = result.email
+                        registeredUserFirstName = result.firstName
+                        registeredUserLastName = result.lastName
+
+                        let inflowobject = {
+                            amount: 0,
+                            userid: result.id
+                        }
+                        let inflowform = new inflowModel(inflowobject)
+                        inflowform.save((err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                console.log(result)
+                            }
+                        })
+                        let outflowobject = {
+                            amount: 0,
+                            userid: result.id
+                        }
+                        let outflowform = new outflowModel(outflowobject)
+                        outflowform.save((err, result) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                console.log(result)
+                            }
+                        })
+
+
+
 
                     }
                 })
@@ -34,12 +76,14 @@ const signupPost = (req, res) => {
 
 
 }
+
 //signin post request
 const signinPost = (req, res) => {
 
     userModel.findOne({ email: req.body.email }, (err, result) => {
         if (err) {
             console.log(err)
+            res.send({ err: true })
         } else {
             if (result) {
                 if (result.email === req.body.email && result.password === req.body.password) {
@@ -67,7 +111,7 @@ const dashboardetails = (req, res) => {
         }
     })
 }
-let user
+let user;
 //funding of account post request
 const fundAccount = (req, res) => {
 
@@ -98,9 +142,11 @@ const transferDebit = (req, res) => {
         console.log(user)
         userModel.findByIdAndUpdate({ _id: signinValidation }, user, (err, result) => {
             if (err) {
-                console.log('failed transcation')
+                // console.log('failed transcation')
+                res.send({ mesage: 'Transaction Not Succesful', status: false })
             } else {
-                console.log('transfer succesful')
+                // console.log('transfer succesful')
+                res.send({ mesage: 'Transaction Succesful', status: true })
             }
         })
     })
@@ -122,10 +168,28 @@ const fundingaccountHistory = (req, res) => {
 const outflow = (req, res) => {
 
 }
+
+let inflowupdate;
 const inflow = (req, res) => {
-    console.log(req.body)
+    let { amount } = req.body
+    inflowModel.findOne({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log('unable, to find inflow')
+        } else {
+            inflowupdate = result
+            inflowupdate.amount = Number(result.amount) + Number(amount)
+            inflowModel.findOneAndUpdate({ userid: signinValidation }, inflowupdate, (err, result) => {
+                if (err) {
+                    console.log('unable to update inflow')
+                } else {
+                    console.log('inflow updated succesfully')
+                }
+            })
+        }
+    })
 
 }
+
 
 //wallet creation post request
 const walletCreation = (req, res) => {
@@ -163,6 +227,98 @@ const deleteWallet = (req, res) => {
         }
     })
 }
+//fund wallet \
+let userResult
+let walletResult
+const fundWallet = (req, res) => {
+    console.log(req.body)
+    userModel.findOne({ _id: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            userResult = result
+            walletModel.findOne({ _id: req.body.walletid }, (err, result) => {
+                if (err) {
+                    console.log('error')
+                } else {
+                    walletResult = result
+                    walletResult.fund = result.targetAmount
+                    userResult.accountBalance = Number(userResult.accountBalance) - Number(walletResult.targetAmount)
+                    walletModel.findOneAndUpdate({ _id: req.body.walletid }, walletResult, (err, result) => {
+                        if (err) {
+                            res.send({ message: 'Unable to fund', status: false })
+                        } else {
+                            res.send({ message: 'Succesfull', staus: true })
+                            userModel.findOneAndUpdate({ _id: signinValidation }, userResult, (err, result) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    console.log(result)
+                                }
+                            })
+                        }
+                    })
+
+
+                }
+            })
+        }
+    })
+
+}
+
+
+let img = '';
+const imgUpload = (req, res) => {
+
+    cloudinary.v2.uploader.upload(req.body.imgurl, { public_id: "user_img" }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            img = result.secure_url
+            userModel.findOne({ _id: signinValidation }, (err, result) => {
+                if (err) {
+                    console.log(`can't find user`)
+                } else {
+                    user = result
+                    user.imgUrl = img
+                    userModel.findOneAndUpdate({ id: signinValidation }, user, (err, result) => {
+                        if (err) {
+                            console.log('unable to save')
+                        } else {
+                            console.log('result')
+                        }
+                    })
+                }
+            })
+
+        }
+
+    });
+
+}
+//inflow get
+const inflowGet = (req, res) => {
+    inflowModel.findOne({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.send(result)
+        }
+    })
+}
+//deltransaction
+const delTransaction = (req, res) => {
+    console.log(req.body)
+    transferModel.findByIdAndDelete({ _id: req.body.tid }, (err, result) => {
+        if (err) {
+            console.log('unableto delete')
+        } else {
+            console.log('deleted')
+        }
+    })
+
+}
 //transaction history get requests
 const transactionHistory = (req, res) => {
     transferModel.find({ transferid: signinValidation }, (err, result) => {
@@ -181,10 +337,14 @@ module.exports = {
     fundAccount,
     transferDebit,
     fundingaccountHistory,
+    delTransaction,
     transactionHistory,
     outflow,
     inflow,
+    inflowGet,
     walletCreation,
     wallet,
-    deleteWallet
+    deleteWallet,
+    fundWallet,
+    imgUpload
 }
