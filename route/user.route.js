@@ -11,6 +11,7 @@ const { signupPost,
     transactionHistory,
     inflow,
     outflow,
+    outflowGet,
     inflowGet,
     walletCreation,
     wallet,
@@ -31,6 +32,7 @@ route.get('/transactionhistory', transactionHistory)
 route.post('/inflow', inflow)
 route.get('/inflowget', inflowGet)
 route.post('/outflow', outflow)
+route.get('/outflowget', outflowGet)
 route.post('/walletcreation', walletCreation)
 route.get('/wallet', wallet)
 route.post('/deletewallet', deleteWallet)

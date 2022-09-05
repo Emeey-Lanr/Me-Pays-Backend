@@ -10,7 +10,7 @@ const transferSchema = mongoose.Schema({
     date: { type: String },
     year: { type: String },
     month: { type: String },
-    time: { type: Object },
+    time: { type: String },
 
 })
 

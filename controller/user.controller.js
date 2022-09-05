@@ -164,8 +164,36 @@ const fundingaccountHistory = (req, res) => {
         }
     })
 }
-
+let outflowUpdate;
 const outflow = (req, res) => {
+    console.log(`${req.body.amount}yes it is`)
+    outflowModel.findOne({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(result)
+            outflowUpdate = result
+            outflowUpdate.amount = Number(result.amount) + Number(req.body.amount)
+            outflowModel.findOneAndUpdate({ userid: signinValidation }, outflowUpdate, (err, result) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(result)
+                }
+            })
+        }
+    })
+
+
+}
+const outflowGet = (req, res) => {
+    outflowModel.findOne({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.send(result)
+        }
+    })
 
 }
 
@@ -282,9 +310,9 @@ const imgUpload = (req, res) => {
                 } else {
                     user = result
                     user.imgUrl = img
-                    userModel.findOneAndUpdate({ id: signinValidation }, user, (err, result) => {
+                    userModel.findOneAndUpdate({ _id: signinValidation }, user, (err, result) => {
                         if (err) {
-                            console.log('unable to save')
+                            console.log(err)
                         } else {
                             console.log('result')
                         }
@@ -315,6 +343,7 @@ const delTransaction = (req, res) => {
             console.log('unableto delete')
         } else {
             console.log('deleted')
+            res.send({ message: 'deleted', status: true })
         }
     })
 
@@ -340,6 +369,7 @@ module.exports = {
     delTransaction,
     transactionHistory,
     outflow,
+    outflowGet,
     inflow,
     inflowGet,
     walletCreation,
