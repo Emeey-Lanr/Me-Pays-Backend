@@ -17,7 +17,8 @@ const { signupPost,
     wallet,
     deleteWallet,
     fundWallet,
-    imgUpload
+    imgUpload,
+    editAccount
 } = require('../controller/user.controller')
 
 
@@ -38,6 +39,7 @@ route.get('/wallet', wallet)
 route.post('/deletewallet', deleteWallet)
 route.post('/fundwallet', fundWallet)
 route.post('/imgupload', imgUpload)
+route.post('/editAccount', editAccount)
 
 
 

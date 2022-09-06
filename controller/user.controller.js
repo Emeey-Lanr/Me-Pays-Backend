@@ -120,12 +120,12 @@ const fundAccount = (req, res) => {
         user.accountBalance = Number(result.accountBalance) + Number(req.body.accountBalance)
         user.accountPin = Number(req.body.accountPin)
         console.log(user)
-        userModel.findOneAndUpdate({ _id: signinValidation }, user, (err) => {
+        userModel.findOneAndUpdate({ _id: signinValidation }, user, (err, result) => {
             if (err) {
-                console.log('unablet to save')
+                console.log('unable to save')
             } else {
                 console.log('saved')
-                res.send(result)
+                res.send({ message: 'succesful', status: true })
             }
         })
 
@@ -178,7 +178,7 @@ const outflow = (req, res) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    console.log(result)
+                    res.send({ status: true })
                 }
             })
         }
@@ -210,7 +210,7 @@ const inflow = (req, res) => {
                 if (err) {
                     console.log('unable to update inflow')
                 } else {
-                    console.log('inflow updated succesfully')
+                    res.send({ message: 'updated', status: true })
                 }
             })
         }
@@ -250,7 +250,7 @@ const deleteWallet = (req, res) => {
             res.send({ message: 'unable to delete' })
         } else {
             if (result) {
-                res.send({ message: 'Deleted Sucessfully' })
+                res.send({ message: 'Deleted Sucessfully', status: true })
             }
         }
     })
@@ -314,7 +314,7 @@ const imgUpload = (req, res) => {
                         if (err) {
                             console.log(err)
                         } else {
-                            console.log('result')
+                            res.send({ status: true })
                         }
                     })
                 }
@@ -356,7 +356,48 @@ const transactionHistory = (req, res) => {
 }
 
 
+const editAccount = (req, res) => {
+    console.log(req.body)
+    userModel.findOne({ _id: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(`unable to find user ${err}`)
+        } else {
+            user = result
+            user.firstName = req.body.firstName
+            user.lastName = req.body.lastName
+            user.phoneNumber = req.body.phoneNumber
+            user.password = req.body.password
+            user.accountPin = req.body.accountPin
+            userModel.findByIdAndUpdate({ _id: signinValidation }, user, (err, result) => {
+                if (err) {
+                    console.log(`unable to update account ${err}`)
+                    res.send({ message: 'unable to update', status: false })
+                } else {
+                    console.log('accounted edited')
+                    res.send({ message: 'updated succesfully', status: true })
+                }
+            })
+        }
+    })
+}
+const deleteAccount = (req, res) => {
+    inflowModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
 
+    })
+    outflowModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
+
+    })
+    walletModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
+
+    })
+    transferModel.findOneAndDelete({ transferid: signinValidation }, (err, res) => {
+
+    })
+    userModel.findByIdAndDelete({ _id: signinValidation }, (err, result) => {
+
+    })
+
+}
 
 
 module.exports = {
@@ -376,5 +417,6 @@ module.exports = {
     wallet,
     deleteWallet,
     fundWallet,
-    imgUpload
+    imgUpload,
+    editAccount
 }
