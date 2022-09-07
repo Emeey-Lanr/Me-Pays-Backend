@@ -40,36 +40,38 @@ const signupPost = (req, res) => {
                         registeredUserFirstName = result.firstName
                         registeredUserLastName = result.lastName
 
-                        let inflowobject = {
-                            amount: 0,
-                            userid: result.id
-                        }
-                        let inflowform = new inflowModel(inflowobject)
-                        inflowform.save((err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                console.log(result)
-                            }
-                        })
-                        let outflowobject = {
-                            amount: 0,
-                            userid: result.id
-                        }
-                        let outflowform = new outflowModel(outflowobject)
-                        outflowform.save((err, result) => {
-                            if (err) {
-                                console.log(err)
-                            } else {
-                                console.log(result)
-                            }
-                        })
-
-
 
 
                     }
+                    let inflowobject = {
+                        amount: 0,
+                        userid: result.id
+                    }
+                    let inflowform = new inflowModel(inflowobject)
+                    inflowform.save((err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log(result)
+                        }
+                    })
+                    let outflowobject = {
+                        amount: 0,
+                        userid: result.id
+                    }
+                    let outflowform = new outflowModel(outflowobject)
+                    outflowform.save((err, result) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log(result)
+                        }
+                    })
+
                 })
+
+
+
             }
         }
     })
@@ -86,13 +88,21 @@ const signinPost = (req, res) => {
             res.send({ err: true })
         } else {
             if (result) {
-                if (result.email === req.body.email && result.password === req.body.password) {
-                    console.log('equal')
-                    res.send({ status: true, userid: result.id })
-                    signinValidation = result.id
-                } else {
-                    res.send({ message: 'Invalid Password', status: false })
-                }
+
+                result.Validatepassword(req.body.password, (err, same) => {
+                    if (err) {
+                        res.send({ message: 'an error occured', status: false })
+                    } else {
+                        if (same) {
+                            signinValidation = result.id
+                            res.send({ message: 'welcome', status: true, userid: result.id })
+                        } else {
+                            res.send({ message: 'Invalid password', status: false })
+                        }
+                    }
+
+                })
+
             } else {
                 res.send({ message: 'Invalid Credentails', status: false })
             }
@@ -164,6 +174,7 @@ const fundingaccountHistory = (req, res) => {
         }
     })
 }
+// A post request updating the outflow of money
 let outflowUpdate;
 const outflow = (req, res) => {
     console.log(`${req.body.amount}yes it is`)
@@ -186,6 +197,7 @@ const outflow = (req, res) => {
 
 
 }
+//A get request for the outflow that shows the data available
 const outflowGet = (req, res) => {
     outflowModel.findOne({ userid: signinValidation }, (err, result) => {
         if (err) {
@@ -197,6 +209,7 @@ const outflowGet = (req, res) => {
 
 }
 
+// A post request updating the inflow of money
 let inflowupdate;
 const inflow = (req, res) => {
     let { amount } = req.body
@@ -217,7 +230,16 @@ const inflow = (req, res) => {
     })
 
 }
-
+//inflow get
+const inflowGet = (req, res) => {
+    inflowModel.findOne({ userid: signinValidation }, (err, result) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.send(result)
+        }
+    })
+}
 
 //wallet creation post request
 const walletCreation = (req, res) => {
@@ -243,6 +265,7 @@ const wallet = (req, res) => {
     })
 
 }
+//deleting of wallet
 const deleteWallet = (req, res) => {
 
     walletModel.findByIdAndDelete({ _id: req.body['walletid'] }, (err, result) => {
@@ -295,7 +318,7 @@ const fundWallet = (req, res) => {
 
 }
 
-
+//image upload using cloudinary
 let img = '';
 const imgUpload = (req, res) => {
 
@@ -325,16 +348,7 @@ const imgUpload = (req, res) => {
     });
 
 }
-//inflow get
-const inflowGet = (req, res) => {
-    inflowModel.findOne({ userid: signinValidation }, (err, result) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.send(result)
-        }
-    })
-}
+
 //deltransaction
 const delTransaction = (req, res) => {
     console.log(req.body)
@@ -356,6 +370,7 @@ const transactionHistory = (req, res) => {
 }
 
 
+//
 const editAccount = (req, res) => {
     console.log(req.body)
     userModel.findOne({ _id: signinValidation }, (err, result) => {
@@ -366,7 +381,6 @@ const editAccount = (req, res) => {
             user.firstName = req.body.firstName
             user.lastName = req.body.lastName
             user.phoneNumber = req.body.phoneNumber
-            user.password = req.body.password
             user.accountPin = req.body.accountPin
             userModel.findByIdAndUpdate({ _id: signinValidation }, user, (err, result) => {
                 if (err) {
@@ -380,24 +394,7 @@ const editAccount = (req, res) => {
         }
     })
 }
-const deleteAccount = (req, res) => {
-    inflowModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
 
-    })
-    outflowModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
-
-    })
-    walletModel.findOneAndDelete({ userid: signinValidation }, (err, res) => {
-
-    })
-    transferModel.findOneAndDelete({ transferid: signinValidation }, (err, res) => {
-
-    })
-    userModel.findByIdAndDelete({ _id: signinValidation }, (err, result) => {
-
-    })
-
-}
 
 
 module.exports = {
