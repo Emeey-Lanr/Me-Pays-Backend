@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "/static/css/main.20fc5c03.css",
+    "main.js": "/static/js/main.d6ed32ed.js",
+    "static/media/notavatar.gif": "/static/media/notavatar.b2c74c78c045571de8a4.gif",
+    "static/media/cover.png": "/static/media/cover.5949cd8683b13dc10b2b.png",
+    "static/media/error.png": "/static/media/error.adc3cdefb333873bd47d.png",
+    "static/media/default.png": "/static/media/default.16b99e0d502f12a8add7.png",
+    "static/media/pay.jpg": "/static/media/pay.3117116e25a36187269d.jpg",
+    "static/media/Credit-Card-Font (1).zip": "/static/media/Credit-Card-Font (1).9d992260aca1234a1ced.zip",
+    "index.html": "/index.html",
+    "main.20fc5c03.css.map": "/static/css/main.20fc5c03.css.map",
+    "main.d6ed32ed.js.map": "/static/js/main.d6ed32ed.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.20fc5c03.css",
+    "static/js/main.d6ed32ed.js"
+  ]
+}

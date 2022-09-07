@@ -11,7 +11,7 @@ app.use(express.json({ limit: '50mb' }))
 app.use(cors())
 const user_route = require('./route/user.route')
 app.use('/user', user_route)
-
+app.use(express.static('build'))
 const mongoose = require('mongoose')
 mongoose.connect(URI, (err) => {
     if (err) {
@@ -21,6 +21,9 @@ mongoose.connect(URI, (err) => {
     }
 })
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/build')
+})
 
 
 
